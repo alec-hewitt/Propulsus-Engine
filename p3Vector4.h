@@ -1,0 +1,38 @@
+#ifndef P3VECTOR4_H
+#define P3VECTOR4_H
+
+class Vector4{
+	public:
+	
+		//x, y, z components
+		float x, y, z;
+
+		//default constructor
+		Vector4();
+
+		//constructor
+		Vector4(float x, float y, float z);
+
+		//destructor
+		~Vector4();
+		
+		//operators
+		//adds the x, y, z, and w components of another Vector3 to this
+		Vector4 operator + (const Vector4 &v4Other);
+		//subtracts the x, y, z, and w components of another Vector3 from this
+		Vector4 operator - (const Vector4 &v4Other);
+		//sets the x, y, z, and w components of this to those of another Vector3
+		Vector4 operator = (const Vector4 &v4other);
+		//multiplies the x, y, z, and w components of this Vector3 by a scalar
+		Vector4 operator * (const float v4Scalar);
+		//Vector4 cross product
+		Vector4 operator * (const Vector4 &v4Other);
+		///divide by scalar
+		Vector4 operator / (const float v4Scalar);
+		//set the vector4's  x, y, z, and w components
+		void set(float x, float y, float z);
+		//resets all Vector4 quantities to 0 ///not sure if this is usefull yet
+		void reset();
+};
+
+#endif

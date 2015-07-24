@@ -1,0 +1,14 @@
+#ifndef P3SCALAR_H
+#define P3SCALAR_H
+
+#include "stdafx.h"
+#include <iostream>
+
+class Scalar{
+	//scalar quantity
+	float scalar;
+	//constructor
+	Scalar(float scalar);
+};
+
+#endif

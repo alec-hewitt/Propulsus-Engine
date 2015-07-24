@@ -1,0 +1,9 @@
+using namespace std;
+
+#include "stdafx.h"
+#include <iostream>
+#include "p3Scalar.h"
+
+Scalar::Scalar(float scalar){
+	this->scalar = scalar;
+}

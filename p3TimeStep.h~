@@ -1,0 +1,20 @@
+#ifndef P3TIMESTEP_H
+#define P3TIMESTEP_H
+
+struct p3TimeStep{
+
+	//change in time between physics and collision itterations (seconds)
+	float dt = 0;
+
+	//duration of time to simulate (seconds)
+	float duration = 0;
+
+	int velocityIterations = 0; //times to solve for velocity
+
+	int positionIterations = 0; //times to solve for position
+
+	float inverse_dt = 0; //calculations per second, or (1/dt) (seconds)
+
+};
+
+#endif
