@@ -41,29 +41,29 @@ int main(){
 
 	p3Universe universe(step);
 
-	Body* b1 = universe.createBody();
-	b1->setMass(1.5);
+	Body b1 = universe.createBody();
+	b1.setMass(1.5);
 	Vector4 pos1(0, 0, 0);
-	b1->setAbsPosition(pos1);
+	b1.setAbsPosition(pos1);
 
-	Body* b2 = universe.createBody();
-	b2->setMass(2);
+	Body b2 = universe.createBody();
+	b2.setMass(2);
 	Vector4 pos2(150, 0, 0);
-	b2->setAbsPosition(pos2);
+	b2.setAbsPosition(pos2);
 
 	p3Structure st;
 	st.setSphere(2);
 
-	b1->setStructure(st);
+	b1.setStructure(st);
 
-	b2->setStructure(st);
+	b2.setStructure(st);
 
 	Vector4 force(0, 0, 0);
 	
 	Vector4 force2(0, 0, 0);
 
-	b1->applyForce(force);
-	b2->applyForce(force2);
+	b1.applyForce(force);
+	b2.applyForce(force2);
 
 	universe.update();
 

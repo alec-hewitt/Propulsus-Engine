@@ -10,6 +10,8 @@ class p3Universe{
 	
 public:
 
+	const float gravitation = 0.00000000000667384;
+
 	//constructor
 	p3Universe(p3TimeStep timeStep);
 
@@ -23,9 +25,9 @@ public:
 	//array of all rigidbodies in universe
 	//eventually these will only be proccesed through galaxy or celestial body..
 	//to account for relativity and other changes in space-time
-	Body universalBodies[5];
+	Body* universalBodies[1];
 	int nBodies;
-	
+
 	//Main Loop
 	//Has access and control over time and DT
 	//Itterates until program ends at 60i/s
@@ -49,11 +51,7 @@ public:
 
 	//adds a new rigidbody to the universe
 	//body will be one outside of any scope
-	Body* createBody();
-
-	//destroy a body from the universe
-	void destroyBody(Body body);
-
+	Body createBody();
 };
 
 #endif

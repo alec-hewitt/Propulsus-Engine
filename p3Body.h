@@ -13,12 +13,13 @@ public:
 	Body();
 
 	//sets up the body before any calculations are done
-	//sets some properties to zero, sets others to defined info in bodyDef from connstructor
+	//sets some properties to zero, sets others to defined info in bodyDef from constructor
 	void setupBody();
 
-	//setup strucure component if applicable
+	//unique body ID
+	int id;
 
-	//rigidbody properties
+	//rigid-body properties
 	//position/rotation
 	Vector4 relPos;
 	Vector4 absPos;

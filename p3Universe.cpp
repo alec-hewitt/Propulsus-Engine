@@ -47,60 +47,73 @@ void p3Universe::stepSimulation(){
 	
 	//solve physics and TOI events for each body
 	for (int i = 1; i <= nBodies; i++){
-		
-		Body b = universalBodies[i];
+		Body* b = universalBodies[i];
+		//gravity
+		for(int i = 0; i < nBodies; i++){
+			if(universalBodies[i] != b){
+				float distx = b->absPos.x - universalBodies[i]->absPos.x;
+				float disty = b->absPos.y - universalBodies[i]->absPos.y;
+				float distz = b->absPos.z - universalBodies[i]->absPos.z;
+				float fgx = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (distx * distx)));
+				float fgy = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (disty * disty)));
+				float fgz = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (distz * distz)));
+				Vector4 gravitation;
+				gravitation.set(fgx, fgy, fgz);
+				universalBodies[i]->applyForce(gravitation);
+			}
+		}
 
 		//resolve forces on body
-		b.resolveLinearForces();
-		b.resolveAngularForces();
+		b->resolveLinearForces();
+		b->resolveAngularForces();
 
 		//resolve acceleration accumulative
-		b.acceleration = (b.netForce / b.mass);
+		b->acceleration = (b->netForce / b->mass);
 		
 		//set linear velocity accumulative
-		b.linearVelocity = b.linearVelocity + (b.acceleration * step.dt);
+		b->linearVelocity = b->linearVelocity + (b->acceleration * step.dt);
 
 		//enforce the speed limit
-		if (b.linearVelocity.x > 299792458){
-			b.linearVelocity.x = 2997924578;
+		if (b->linearVelocity.x > 299792458){
+			b->linearVelocity.x = 2997924578;
 		}
-		if (b.linearVelocity.y > 299792458){
-			b.linearVelocity.y = 299792458;
+		if (b->linearVelocity.y > 299792458){
+			b->linearVelocity.y = 299792458;
 		}
-		if (b.linearVelocity.z > 299792458){
-			b.linearVelocity.z = 299792458;
+		if (b->linearVelocity.z > 299792458){
+			b->linearVelocity.z = 299792458;
 		}
 
 		//retrieve greatest velocity
-		if (b.linearVelocity.x > b.linearVelocity.y){
-			if (b.linearVelocity.x > b.linearVelocity.z){
-				b.greatestV = b.linearVelocity.x;
+		if (b->linearVelocity.x > b->linearVelocity.y){
+			if (b->linearVelocity.x > b->linearVelocity.z){
+				b->greatestV = b->linearVelocity.x;
 			} else {
-				b.greatestV = b.linearVelocity.z;
+				b->greatestV = b->linearVelocity.z;
 			}
 		}
-		else if (b.linearVelocity.y > b.linearVelocity.z){
-			b.greatestV = b.linearVelocity.y;
+		else if (b->linearVelocity.y > b->linearVelocity.z){
+			b->greatestV = b->linearVelocity.y;
 		}
 		else {
-			b.greatestV = b.linearVelocity.z;
+			b->greatestV = b->linearVelocity.z;
 		}
 		
 
 		//set absolute universe position (accumulative)
-		b.absPos = b.absPos + (b.linearVelocity * step.dt);
+		b->absPos = b->absPos + (b->linearVelocity * step.dt);
 		
 		//calculate angular acceleration
-		b.angularAcceleration = (b.netTorque / b.structure.rotationalInertia);
+		b->angularAcceleration = (b->netTorque / b->structure.rotationalInertia);
 
 		//calculate angular velocity
-		b.angularVelocity = b.angularVelocity + (b.angularAcceleration * step.dt);
+		b->angularVelocity = b->angularVelocity + (b->angularAcceleration * step.dt);
 
 		//calculate angular momentum
-		b.angularMomentum + (b.angularVelocity * b.structure.rotationalInertia);
+		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
 		//detect collisions and solve body restitutions
-		solve(&b);
+		solve(b);
 
 		//last! return body to modified temp
 		universalBodies[i] = b;
@@ -124,32 +137,44 @@ void p3Universe::solve(Body* body){
 	
 }
 
+/*
+ * It may be reasonable to use only a more brute-force and less intrusive broad-phase
+ * collision detection method with no further detection phases, due to both the
+ * expected small amount of generated bodies in the universe, and the expected scarcity
+ * of collisions in the universe at any given time or even throughout entire execution.
+ * The nature of most collisions in problems of orbital dynamics (excluding those such as docking procedures)
+ * do not generally require intense collision checking in small spaces.
+ * Basically is this ship going to hit mars or not.
+ */
+
 void p3Universe::broadPhase(Body* body){
 
 	for (int i = 0; i <= nBodies; i++){
 
 		//dont check collision with self or pre-checked bodies
-		if (&universalBodies[i] != body && universalBodies[i].checked == false){
+		if (universalBodies[i] != body && universalBodies[i]->checked == false){
 
 				//sum of both bodies' radius lengths
-				float radii = body->boundingSphereRadius + universalBodies[i].boundingSphereRadius;
+				float radii = body->boundingSphereRadius + universalBodies[i]->boundingSphereRadius;
 
 				//term for greatest distance bodies can travel in a single time step
 				//each term is RVD for each body
-				float velocityDistances = (body->greatestV * step.dt) + (universalBodies[i].greatestV * step.dt);
+				float velocityDistances = (body->greatestV * step.dt) + (universalBodies[i]->greatestV * step.dt);
 
 				//complete radial size of collision  hit zones
 				float boundingDistances = radii;
 
 				//distance between bodies
-				float dist = sqrt(((body->absPos.x - universalBodies[i].absPos.x) * (body->absPos.x - universalBodies[i].absPos.x)) + ((body->absPos.y - universalBodies[i].absPos.y) * (body->absPos.y - universalBodies[i].absPos.y)) + ((body->absPos.z - universalBodies[i].absPos.z) * (body->absPos.z - universalBodies[i].absPos.z)));
+				float dist = sqrt(((body->absPos.x - universalBodies[i]->absPos.x) * (body->absPos.x - universalBodies[i]->absPos.x)) + ((body->absPos.y - universalBodies[i]->absPos.y) * (body->absPos.y - universalBodies[i]->absPos.y)) + ((body->absPos.z - universalBodies[i]->absPos.z) * (body->absPos.z - universalBodies[i]->absPos.z)));
 
 				cout << "dist" << dist << endl;
 
 				if (dist < boundingDistances){
 					//collision of bounding spheres detected
-					narrowPhase(body, &universalBodies[i]);
-
+					narrowPhase(body, universalBodies[i]);
+					body->collisionFlag = true;
+					universalBodies[i]->collisionFlag = true;
+					//debug collision instances
 					cout << "collision" << endl;
 
 				}
@@ -162,39 +187,25 @@ void p3Universe::broadPhase(Body* body){
 
 }
 
-void p3Universe::narrowPhase(Body* body, Body* other){
-	//cout << "narrrow" << endl;
-
-	/*
-	if collision, flag bodies :
-
-	body->collisionFlag = true;
-	universalBodies[i].collisionFlag = true;
-
-	*/
-}
-
-Body* p3Universe::createBody(){
+Body p3Universe::createBody(){
 
 	//create new body
 	Body body;
+
 	//setup with bodydef
 	body.setupBody();
 	
+	//assign next body in array to new body
+	universalBodies[nBodies] = &body;
+
+	//assign body id as its position in array
+	body.id = nBodies;
+
 	//increment number of bodies
 	nBodies++;
-	//assign next bady in array to new body
-	universalBodies[nBodies] = body;
-
-	//create body pointer to array location
-	Body* b = &universalBodies[nBodies];
 
 	//return address of body in array
-	return b;
+	return body;
 
 }
 
-void p3Universe::destroyBody(Body body){
-	//remove specific body in param from body array
-	
-}

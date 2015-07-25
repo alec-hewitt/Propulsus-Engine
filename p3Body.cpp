@@ -35,7 +35,7 @@ void Body::setupBody(){
 	netForce.set(0, 0, 0);
 	netTorque.set(0, 0, 0);
 
-	//resolve forces applied on object before next physics step occours
+	//resolve forces applied on object before next physics step occurs
 	resolveLinearForces();
 	resolveAngularForces();
 
