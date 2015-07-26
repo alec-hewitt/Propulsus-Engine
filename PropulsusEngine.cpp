@@ -37,33 +37,28 @@ int main(){
 
 	p3TimeStep step;
 	step.dt = .2;
-	step.duration = 5;
+	step.duration = 250;
 
 	p3Universe universe(step);
 
-	Body b1 = universe.createBody();
-	b1.setMass(1.5);
+	Body* b1 = universe.createBody();
+	b1->setMass(600000000000000000000.9);
 	Vector4 pos1(0, 0, 0);
-	b1.setAbsPosition(pos1);
+	b1->setAbsPosition(pos1);
 
-	Body b2 = universe.createBody();
-	b2.setMass(2);
-	Vector4 pos2(150, 0, 0);
-	b2.setAbsPosition(pos2);
+	Body* b2 = universe.createBody();
+	b2->setMass(600000000000000000000.9);
+	Vector4 pos2(120000000, 0, 0);
+	b2->setAbsPosition(pos2);
 
 	p3Structure st;
-	st.setSphere(2);
+	st.setSphere(50000000);
 
-	b1.setStructure(st);
+	p3Structure st2;
+	st2.setSphere(50000000);
 
-	b2.setStructure(st);
-
-	Vector4 force(0, 0, 0);
-	
-	Vector4 force2(0, 0, 0);
-
-	b1.applyForce(force);
-	b2.applyForce(force2);
+	b1->setStructure(st);
+	b2->setStructure(st2);
 
 	universe.update();
 

@@ -17,7 +17,7 @@ p3Universe::p3Universe(p3TimeStep timeStep){
 //runs
 void p3Universe::update(){
 	
-	//itterate at specified deltatimes until time duration is reached
+	//Iterate at specified deltatimes until time duration is reached
 	//read code, step simulation, and solve collision
 	//non real-time so re-itterate immediately
 
@@ -27,12 +27,18 @@ void p3Universe::update(){
 	//begin update loop
 	for (int i = 0; i < nItterations; i++){
 		
+		//mark all bodies as unchecked for TOI collision events
+		for(int i = 0; i < nBodies; i++){
+			universalBodies[i].checked = false;
+		}
+
 		//STAGE
 		//step physics
 		stepSimulation();
 
 		//STAGE
 		//save data
+
 
 	}
 	
@@ -46,22 +52,24 @@ void p3Universe::stepSimulation(){
 	*/
 	
 	//solve physics and TOI events for each body
-	for (int i = 0; i <= nBodies; i++){
+	for (int i = 0; i < nBodies; i++){
 
-	Body* b = universalBodies[i];
+	Body* b = &universalBodies[i];
 
 		//gravity
 	for(int i = 0; i < nBodies; i++){
-			if(universalBodies[i] != b){
-				float distx = b->absPos.x - universalBodies[i]->absPos.x;
-				float disty = b->absPos.y - universalBodies[i]->absPos.y;
-				float distz = b->absPos.z - universalBodies[i]->absPos.z;
-				float fgx = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (distx * distx)));
-				float fgy = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (disty * disty)));
-				float fgz = -1 * (gravitation * ((b->mass * universalBodies[i]->mass) / (distz * distz)));
+			if(&universalBodies[i] != b){
+				float distx = b->absPos.x - universalBodies[i].absPos.x;
+				float disty = b->absPos.y - universalBodies[i].absPos.y;
+				float distz = b->absPos.z - universalBodies[i].absPos.z;
+				float fgx = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distx * distx)));
+				float fgy = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (disty * disty)));
+				float fgz = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distz * distz)));
 				Vector4 gravitation;
 				gravitation.set(fgx, fgy, fgz);
-				universalBodies[i]->applyForce(gravitation);
+				universalBodies[i].applyForce(gravitation);
+
+				cout << fgx << endl;
 			}
 		}
 
@@ -104,7 +112,7 @@ void p3Universe::stepSimulation(){
 
 		//set absolute universe position (accumulative)
 		b->absPos = b->absPos + (b->linearVelocity * step.dt);
-		
+
 		//calculate angular acceleration
 		b->angularAcceleration = (b->netTorque / b->structure.rotationalInertia);
 
@@ -114,29 +122,10 @@ void p3Universe::stepSimulation(){
 		//calculate angular momentum
 		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
-		//detect collisions and solve body restitutions
-		solve(b);
-
-		//last! return body to modified temp
-		universalBodies[i] = b;
+		broadPhase(b);
 
 	}
-
-}
-
-void p3Universe::solve(Body* body){
-	//solve collisions
-	body->checked = false;
-	body->collisionFlag = false;
-
-	//run collision detection methods
-	broadPhase(body);
-
-	//body is clear of collisions if failed to detect any
-	if (body->collisionFlag == false){
-		body->checked = true;
-	}
-	
+	return;
 }
 
 /*
@@ -151,62 +140,69 @@ void p3Universe::solve(Body* body){
 
 void p3Universe::broadPhase(Body* body){
 
-	for (int i = 0; i <= nBodies; i++){
+	//nBodies -1 because i starts at 0 and nBodies starts at 1
+	for (int i = 0; i <= (nBodies - 1); i++){
 
 		//dont check collision with self or pre-checked bodies
-		if (universalBodies[i] != body && universalBodies[i]->checked == false && nBodies > 1){
+		if (&universalBodies[i] != body && universalBodies[i].checked == false && nBodies > 1){
 
 				//sum of both bodies' radius lengths
-				float radii = body->boundingSphereRadius + universalBodies[i]->boundingSphereRadius;
+				float radii = body->boundingSphereRadius + universalBodies[i].boundingSphereRadius;
 
 				//term for greatest distance bodies can travel in a single time step
 				//each term is RVD for each body
-				//float velocityDistances = (body->greatestV * step.dt) + (universalBodies[i]->greatestV * step.dt);
+
+				float velocityDistances = (body->greatestV * step.dt) - (universalBodies[i].greatestV * step.dt);
 
 				//complete radial size of collision  hit zones
-				float boundingDistances = radii;
+				float boundingDistances = radii + velocityDistances;
 
 				//distance between bodies
-				float dist = sqrt(((body->absPos.x - universalBodies[i]->absPos.x) * (body->absPos.x - universalBodies[i]->absPos.x)) + ((body->absPos.y - universalBodies[i]->absPos.y) * (body->absPos.y - universalBodies[i]->absPos.y)) + ((body->absPos.z - universalBodies[i]->absPos.z) * (body->absPos.z - universalBodies[i]->absPos.z)));
-
-				cout << "dist" << dist << endl;
+				float dist = sqrt(((body->absPos.x - universalBodies[i].absPos.x) * (body->absPos.x - universalBodies[i].absPos.x)) + ((body->absPos.y - universalBodies[i].absPos.y) * (body->absPos.y - universalBodies[i].absPos.y)) + ((body->absPos.z - universalBodies[i].absPos.z) * (body->absPos.z - universalBodies[i].absPos.z)));
 
 				if (dist < boundingDistances){
 					//collision of bounding spheres detected
 					body->collisionFlag = true;
-					universalBodies[i]->collisionFlag = true;
+					universalBodies[i].collisionFlag = true;
 					//debug collision instances
+
 					cout << "collision" << endl;
 
 				}
 
-				//set body as checked
-				body->checked = true;
+
 		
 		}
 	}
 
+	//set body as checked
+	body->checked = true;
+
+	return;
+
 }
 
-Body p3Universe::createBody(){
+Body* p3Universe::createBody(){
 
 	//create new body
 	Body body;
 
 	//setup with bodydef
 	body.setupBody();
-	
-	//assign next body in array to new body
-	universalBodies[nBodies] = &body;
 
 	//assign body id as its position in array
 	body.id = nBodies;
+
+	//assign next body in array to new body
+	universalBodies[nBodies] = body;
+
+	Body* b = &universalBodies[nBodies];
 
 	//increment number of bodies
 	nBodies++;
 
 	//return address of body in array
-	return body;
+	return b;
 
 }
 

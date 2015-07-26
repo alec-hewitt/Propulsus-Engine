@@ -25,7 +25,7 @@ public:
 	//array of all rigidbodies in universe
 	//eventually these will only be proccesed through galaxy or celestial body..
 	//to account for relativity and other changes in space-time
-	Body *universalBodies[2];
+	Body universalBodies[2];
 	int nBodies;
 
 	//Main Loop
@@ -39,10 +39,6 @@ public:
 	//processes all physics in a fixed timestep
 	void stepSimulation();
 
-	//collision solver
-	//solves for all TOI events and collisions
-	void solve(Body* body);
-
 	//detections collisions of body's bounding spheres
 	void broadPhase(Body* body);
 
@@ -51,7 +47,7 @@ public:
 
 	//adds a new rigidbody to the universe
 	//body will be one outside of any scope
-	Body createBody();
+	Body* createBody();
 };
 
 #endif
