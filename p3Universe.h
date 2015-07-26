@@ -25,7 +25,7 @@ public:
 	//array of all rigidbodies in universe
 	//eventually these will only be proccesed through galaxy or celestial body..
 	//to account for relativity and other changes in space-time
-	Body* universalBodies[1];
+	Body *universalBodies[2];
 	int nBodies;
 
 	//Main Loop

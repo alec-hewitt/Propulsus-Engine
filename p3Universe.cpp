@@ -46,10 +46,12 @@ void p3Universe::stepSimulation(){
 	*/
 	
 	//solve physics and TOI events for each body
-	for (int i = 1; i <= nBodies; i++){
-		Body* b = universalBodies[i];
+	for (int i = 0; i <= nBodies; i++){
+
+	Body* b = universalBodies[i];
+
 		//gravity
-		for(int i = 0; i < nBodies; i++){
+	for(int i = 0; i < nBodies; i++){
 			if(universalBodies[i] != b){
 				float distx = b->absPos.x - universalBodies[i]->absPos.x;
 				float disty = b->absPos.y - universalBodies[i]->absPos.y;
@@ -152,14 +154,14 @@ void p3Universe::broadPhase(Body* body){
 	for (int i = 0; i <= nBodies; i++){
 
 		//dont check collision with self or pre-checked bodies
-		if (universalBodies[i] != body && universalBodies[i]->checked == false){
+		if (universalBodies[i] != body && universalBodies[i]->checked == false && nBodies > 1){
 
 				//sum of both bodies' radius lengths
 				float radii = body->boundingSphereRadius + universalBodies[i]->boundingSphereRadius;
 
 				//term for greatest distance bodies can travel in a single time step
 				//each term is RVD for each body
-				float velocityDistances = (body->greatestV * step.dt) + (universalBodies[i]->greatestV * step.dt);
+				//float velocityDistances = (body->greatestV * step.dt) + (universalBodies[i]->greatestV * step.dt);
 
 				//complete radial size of collision  hit zones
 				float boundingDistances = radii;
@@ -171,7 +173,6 @@ void p3Universe::broadPhase(Body* body){
 
 				if (dist < boundingDistances){
 					//collision of bounding spheres detected
-					narrowPhase(body, universalBodies[i]);
 					body->collisionFlag = true;
 					universalBodies[i]->collisionFlag = true;
 					//debug collision instances

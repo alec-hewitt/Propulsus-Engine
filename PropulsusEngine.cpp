@@ -67,7 +67,5 @@ int main(){
 
 	universe.update();
 
-	//universe.stepSimulation();
-
 }
 
