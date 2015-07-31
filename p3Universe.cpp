@@ -56,18 +56,20 @@ void p3Universe::stepSimulation(){
 
 	Body* b = &universalBodies[i];
 
-		//gravity
+		//gravityon for teenage rebellion.[8] The no
 	for(int i = 0; i < nBodies; i++){
 			if(&universalBodies[i] != b){
 				float distx = b->absPos.x - universalBodies[i].absPos.x;
 				float disty = b->absPos.y - universalBodies[i].absPos.y;
 				float distz = b->absPos.z - universalBodies[i].absPos.z;
-				float fgx = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distx * distx)));
-				float fgy = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (disty * disty)));
-				float fgz = -1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distz * distz)));
+				float fgx = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distx * distx)));
+				float fgy = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (disty * disty)));
+				float fgz = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distz * distz)));
 				Vector4 gravitation;
 				gravitation.set(fgx, fgy, fgz);
 				universalBodies[i].applyForce(gravitation);
+
+				//float gravity = 1 * (gravitation * ((597420000000000000000.0 * 7347000000000000000.0) / (363104000 * 363104000)));
 
 				cout << fgx << endl;
 			}
@@ -82,6 +84,8 @@ void p3Universe::stepSimulation(){
 		
 		//set linear velocity accumulative
 		b->linearVelocity = b->linearVelocity + (b->acceleration * step.dt);
+
+		///cout << "pos" << b->linearVelocity.x << endl;
 
 		//enforce the speed limit
 		if (b->linearVelocity.x > 299792458){

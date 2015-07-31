@@ -80,7 +80,7 @@ void Body::setNetTorque(Vector4 newNetTorque){
 	netTorque = newNetTorque;
 }
 
-void Body::setMass(float newMass){
+void Body::setMass(double newMass){
 	mass = newMass;
 }
 
@@ -114,7 +114,7 @@ Vector4 Body::getNetTorque(){
 	return netTorque;
 }
 
-float Body::getMass(){
+double Body::getMass(){
 	return mass;
 }
 

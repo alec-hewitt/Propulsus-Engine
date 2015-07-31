@@ -42,20 +42,21 @@ int main(){
 	p3Universe universe(step);
 
 	Body* b1 = universe.createBody();
-	b1->setMass(600000000000000000000.9);
+		///TOO LARGE
+	b1->setMass(597420000000000000000);
 	Vector4 pos1(0, 0, 0);
 	b1->setAbsPosition(pos1);
 
 	Body* b2 = universe.createBody();
-	b2->setMass(600000000000000000000.9);
-	Vector4 pos2(120000000, 0, 0);
+	b2->setMass(7347000000000000000);
+	Vector4 pos2(363104000, 0, 0);
 	b2->setAbsPosition(pos2);
 
 	p3Structure st;
-	st.setSphere(50000000);
+	st.setSphere(500);
 
 	p3Structure st2;
-	st2.setSphere(50000000);
+	st2.setSphere(500);
 
 	b1->setStructure(st);
 	b2->setStructure(st2);

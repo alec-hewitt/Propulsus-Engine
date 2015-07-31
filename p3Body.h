@@ -5,6 +5,7 @@
 
 #include "p3Vector4.h"
 #include "p3Structure.h"
+#include <stdint.h>
 
 class Body{
 public:
@@ -23,7 +24,7 @@ public:
 	//position/rotation
 	Vector4 relPos;
 	Vector4 absPos;
-	float mass;
+	double mass;
 	float rotationalInertia;
 	Vector4 rotation;
 	Vector4 angularMomentum;
@@ -45,7 +46,7 @@ public:
 	void setAngularVelocity(Vector4 newAngularVelocity);
 	void setAcceleration(Vector4 newAcceleration);
 	void setNetTorque(Vector4 newNetTorque);
-	void setMass(float newMass);
+	void setMass(double newMass);
 
 	//getters
 
@@ -57,7 +58,7 @@ public:
 	Vector4 getAcceleration();
 	Vector4 getNetTorque();
 	Vector4 getNetForce();
-	float getMass();
+	double getMass();
 	Vector4 getGravitation();
 	float greatestV;
 
