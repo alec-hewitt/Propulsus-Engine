@@ -3,6 +3,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "p3Constants.h"
 
 using namespace std;
 
@@ -14,14 +15,12 @@ p3Universe::p3Universe(p3TimeStep timeStep){
 
 }
 
-//runs
+//Iterate at specified delta-times until time duration is reached
+//read code, step simulation, and solve collision
+//non real-time so re-iterate immediately
 void p3Universe::update(){
-	
-	//Iterate at specified deltatimes until time duration is reached
-	//read code, step simulation, and solve collision
-	//non real-time so re-itterate immediately
 
-	//set itterationns to be made
+	//set iterations to be made
 	int nItterations = (1 / this->step.dt) * this->step.duration;
 	
 	//begin update loop
@@ -32,16 +31,30 @@ void p3Universe::update(){
 			universalBodies[i].checked = false;
 		}
 
-		//STAGE
-		//step physics
 		stepSimulation();
-
-		//STAGE
-		//save data
-
-
 	}
-	
+}
+
+void p3Universe::maneuverInit(){
+	//Analyzes initial and target orbits, and calculates burn objects
+	//with independent calculations for varied maneuver types.
+
+	//if hohmann transfer maneuver... pass packaged orbit data to hohmannTransfer function
+
+}
+
+void p3Universe::hohmannTransferManeuver(){
+	/*accept orbit data
+	create orbit objects and assign to body
+	create transfer orbit object
+	calculate transfer orbit points of intersection, semi-major-axis, and more
+	calculate velocity at transfer orbit intersecting points (store in transfer orbit object)
+	calculate required velocity at intersection points
+	create two burn objects
+	calculate required delta-V at each burn (intersection point) (store in each burn)
+	initiate function in burn objects to calculate burn specifications
+	pass all of this data somewhere accessible!!
+	*/
 }
 
 void p3Universe::stepSimulation(){
@@ -56,21 +69,17 @@ void p3Universe::stepSimulation(){
 
 	Body* b = &universalBodies[i];
 
-		//gravityon for teenage rebellion.[8] The no
-	for(int i = 0; i < nBodies; i++){
+		for(int i = 0; i < nBodies; i++){
 			if(&universalBodies[i] != b){
-				float distx = b->absPos.x - universalBodies[i].absPos.x;
-				float disty = b->absPos.y - universalBodies[i].absPos.y;
-				float distz = b->absPos.z - universalBodies[i].absPos.z;
-				float fgx = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distx * distx)));
-				float fgy = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (disty * disty)));
-				float fgz = 1 * (gravitation * ((b->mass * universalBodies[i].mass) / (distz * distz)));
+				double distx = b->absPos.x - universalBodies[i].absPos.x;
+				double disty = b->absPos.y - universalBodies[i].absPos.y;
+				double distz = b->absPos.z - universalBodies[i].absPos.z;
+				double fgx = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (distx * distx)));
+				double fgy = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (disty * disty)));
+				double fgz = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (distz * distz)));
 				Vector4 gravitation;
 				gravitation.set(fgx, fgy, fgz);
 				universalBodies[i].applyForce(gravitation);
-
-				//float gravity = 1 * (gravitation * ((597420000000000000000.0 * 7347000000000000000.0) / (363104000 * 363104000)));
-
 				cout << fgx << endl;
 			}
 		}
@@ -84,8 +93,6 @@ void p3Universe::stepSimulation(){
 		
 		//set linear velocity accumulative
 		b->linearVelocity = b->linearVelocity + (b->acceleration * step.dt);
-
-		///cout << "pos" << b->linearVelocity.x << endl;
 
 		//enforce the speed limit
 		if (b->linearVelocity.x > 299792458){
@@ -113,7 +120,6 @@ void p3Universe::stepSimulation(){
 			b->greatestV = b->linearVelocity.z;
 		}
 		
-
 		//set absolute universe position (accumulative)
 		b->absPos = b->absPos + (b->linearVelocity * step.dt);
 
@@ -153,9 +159,7 @@ void p3Universe::broadPhase(Body* body){
 				//sum of both bodies' radius lengths
 				float radii = body->boundingSphereRadius + universalBodies[i].boundingSphereRadius;
 
-				//term for greatest distance bodies can travel in a single time step
-				//each term is RVD for each body
-
+				//greatest distance bodies can travel in a single time step
 				float velocityDistances = (body->greatestV * step.dt) - (universalBodies[i].greatestV * step.dt);
 
 				//complete radial size of collision  hit zones
@@ -169,12 +173,7 @@ void p3Universe::broadPhase(Body* body){
 					body->collisionFlag = true;
 					universalBodies[i].collisionFlag = true;
 					//debug collision instances
-
-					cout << "collision" << endl;
-
 				}
-
-
 		
 		}
 	}
@@ -191,7 +190,7 @@ Body* p3Universe::createBody(){
 	//create new body
 	Body body;
 
-	//setup with bodydef
+	//initialize body
 	body.setupBody();
 
 	//assign body id as its position in array

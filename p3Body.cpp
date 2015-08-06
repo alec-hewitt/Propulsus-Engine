@@ -80,10 +80,6 @@ void Body::setNetTorque(Vector4 newNetTorque){
 	netTorque = newNetTorque;
 }
 
-void Body::setMass(double newMass){
-	mass = newMass;
-}
-
 //getters
 
 Vector4 Body::getRelPosition(){

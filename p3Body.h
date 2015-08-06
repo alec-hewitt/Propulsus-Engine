@@ -46,7 +46,6 @@ public:
 	void setAngularVelocity(Vector4 newAngularVelocity);
 	void setAcceleration(Vector4 newAcceleration);
 	void setNetTorque(Vector4 newNetTorque);
-	void setMass(double newMass);
 
 	//getters
 

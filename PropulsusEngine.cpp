@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "p3Body.h"
 #include "p3Universe.h"
 #include "p3TimeStep.h"
+#include "p3Constants.h"
 
 //tests
 
@@ -41,25 +42,24 @@ int main(){
 
 	p3Universe universe(step);
 
-	Body* b1 = universe.createBody();
-		///TOO LARGE
-	b1->setMass(597420000000000000000);
-	Vector4 pos1(0, 0, 0);
-	b1->setAbsPosition(pos1);
+	Body* earth = universe.createBody();
+	Vector4 pos1(0.1, 0, 0);
+	earth->setAbsPosition(pos1);
 
-	Body* b2 = universe.createBody();
-	b2->setMass(7347000000000000000);
-	Vector4 pos2(363104000, 0, 0);
-	b2->setAbsPosition(pos2);
+	Body* moon = universe.createBody();
+	Vector4 pos2(363104000.0, 0, 0);
+	moon->setAbsPosition(pos2);
 
 	p3Structure st;
 	st.setSphere(500);
+	st.mass = earthMass_;
 
 	p3Structure st2;
 	st2.setSphere(500);
+	st2.mass = moonMass_;
 
-	b1->setStructure(st);
-	b2->setStructure(st2);
+	earth->setStructure(st);
+	moon->setStructure(st2);
 
 	universe.update();
 

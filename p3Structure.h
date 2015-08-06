@@ -11,7 +11,7 @@ from solidworks and calculate/analyze its properties for use
 class p3Structure{
 public:
 
-	float mass;
+	double mass;
 	float rotationalInertia;
 	Vector4 centerOfMass;
 	float width;
@@ -27,6 +27,8 @@ public:
 	void setSphere(float radius);
 
 	void setCube(float length);
+
+	void setMass(double mass);
 
 	//external referenced structure setup
 	void setStructure(char resource);
