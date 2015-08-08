@@ -37,8 +37,8 @@ THE SOFTWARE.
 int main(){
 
 	p3TimeStep step;
-	step.dt = .2;
-	step.duration = 250;
+	step.dt = 86400;
+	step.duration = 2592000;
 
 	p3Universe universe(step);
 
@@ -49,6 +49,8 @@ int main(){
 	Body* moon = universe.createBody();
 	Vector4 pos2(363104000.0, 0, 0);
 	moon->setAbsPosition(pos2);
+	Vector4 av(0,1076,0);
+	moon->setLinearVelocity(av);
 
 	p3Structure st;
 	st.setSphere(500);
@@ -64,4 +66,3 @@ int main(){
 	universe.update();
 
 }
-

@@ -24,7 +24,7 @@ void p3Universe::update(){
 	int nItterations = (1 / this->step.dt) * this->step.duration;
 	
 	//begin update loop
-	for (int i = 0; i < nItterations; i++){
+	for (int i = 1; i < nItterations; i++){
 		
 		//mark all bodies as unchecked for TOI collision events
 		for(int i = 0; i < nBodies; i++){
@@ -74,13 +74,15 @@ void p3Universe::stepSimulation(){
 				double distx = b->absPos.x - universalBodies[i].absPos.x;
 				double disty = b->absPos.y - universalBodies[i].absPos.y;
 				double distz = b->absPos.z - universalBodies[i].absPos.z;
-				double fgx = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (distx * distx)));
-				double fgy = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (disty * disty)));
-				double fgz = 1 * (gravitation_ * ((b->mass * universalBodies[i].mass) / (distz * distz)));
+				double fgx = (gravitation_ * ((b->mass * universalBodies[i].mass) / (distx * distx)));
+				if(universalBodies[i].absPos.x > b->absPos.x){fgx = (fgx * -1);}
+				double fgy = (gravitation_ * ((b->mass * universalBodies[i].mass) / (disty * disty)));
+				if(universalBodies[i].absPos.y > b->absPos.y){fgy = (fgy * -1);}
+				double fgz = (gravitation_ * ((b->mass * universalBodies[i].mass) / (distz * distz)));
+				if(universalBodies[i].absPos.z > b->absPos.z){fgz = (fgz * -1);}
 				Vector4 gravitation;
 				gravitation.set(fgx, fgy, fgz);
 				universalBodies[i].applyForce(gravitation);
-				cout << fgx << endl;
 			}
 		}
 
@@ -90,20 +92,9 @@ void p3Universe::stepSimulation(){
 
 		//resolve acceleration accumulative
 		b->acceleration = (b->netForce / b->mass);
-		
+
 		//set linear velocity accumulative
 		b->linearVelocity = b->linearVelocity + (b->acceleration * step.dt);
-
-		//enforce the speed limit
-		if (b->linearVelocity.x > 299792458){
-			b->linearVelocity.x = 2997924578;
-		}
-		if (b->linearVelocity.y > 299792458){
-			b->linearVelocity.y = 299792458;
-		}
-		if (b->linearVelocity.z > 299792458){
-			b->linearVelocity.z = 299792458;
-		}
 
 		//retrieve greatest velocity
 		if (b->linearVelocity.x > b->linearVelocity.y){
@@ -133,6 +124,10 @@ void p3Universe::stepSimulation(){
 		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
 		broadPhase(b);
+
+		cout << b->absPos.x << endl;
+
+		//&universalBodies[i] = b;
 
 	}
 	return;
@@ -173,6 +168,7 @@ void p3Universe::broadPhase(Body* body){
 					body->collisionFlag = true;
 					universalBodies[i].collisionFlag = true;
 					//debug collision instances
+					cout << "COLLISION" << endl;
 				}
 		
 		}
