@@ -35,26 +35,64 @@ void p3Universe::update(){
 	}
 }
 
-void p3Universe::maneuverInit(){
-	//Analyzes initial and target orbits, and calculates burn objects
-	//with independent calculations for varied maneuver types.
-
-	//if hohmann transfer maneuver... pass packaged orbit data to hohmannTransfer function
-
+void p3Universe::universeInit(dataIn in){
+	//setup universe at defined time for required orbits (solar system structure)
+	//generate bodies
 }
 
-void p3Universe::hohmannTransferManeuver(){
-	/*accept orbit data
-	create orbit objects and assign to body
-	create transfer orbit object
-	calculate transfer orbit points of intersection, semi-major-axis, and more
-	calculate velocity at transfer orbit intersecting points (store in transfer orbit object)
-	calculate required velocity at intersection points
-	create two burn objects
-	calculate required delta-V at each burn (intersection point) (store in each burn)
-	initiate function in burn objects to calculate burn specifications
-	pass all of this data somewhere accessible!!
-	*/
+//Analyzes initial and target orbits, and calculates burn objects
+//with independent calculations for varied maneuver types.
+void p3Universe::maneuverInit(dataIn in){
+
+	//run appropriate calculation method
+	if(in.maneuverType == 1){
+		this->hohmannTransferManeuver(in);
+	}
+}
+
+void p3Universe::hohmannTransferManeuver(dataIn in){
+
+	//semi-major axis of transfer orbit
+	double tSMA = (in.iRadius + in.fRadius) / 2;
+
+	//orbital velocity on initial orbit at transfer intersection
+	double initialOrbitV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID]) / in.iRadius);
+	//orbital velocity on final orbit at transfer intersection
+	double finalOrbitV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID]) / in.fRadius);
+
+	//required velocity on transfer orbit at initial orbit intersection
+	double initialTransferV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID]) * ((2/in.iRadius) - (1/tSMA)));
+	//required velocity on transfer orbit at initial orbit intersection
+	double finalTransferV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID]) * ((2/in.fRadius) - (1/tSMA)));
+
+	//delta-V at initial transfer point
+	double initialDV = initialTransferV - initialOrbitV;
+	//delta-V at final transfer point
+	double finalDV = finalTransferV - finalOrbitV;
+
+	//rocket specifications
+	//amount of propellant expelled during each burn
+	float propellantExpelledInitial = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius))));
+	float propellantExpelledFinal = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass)/(in.fRadius * in.fRadius))));
+	//rocket exit velocity
+	float veq = in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius));
+	//thrust of rocket (N)
+	double thrust = in.massEjectRate * veq + in.exitPressure * in.exitArea;
+
+	///calculate burn mechanics
+	//mass of rocket after initial burn
+	double ifMass = in.massInitial - propellantExpelledInitial;
+	//acceleration of rocket
+	double iAcceleration = thrust/ ifMass;
+	//rocket equation DV from expelled mass
+	double iRocketDV = veq * log(in.massInitial / in.massFinal);
+	//total required change in velocity after first burn
+	double ifDV = initialDV - iRocketDV;
+	//burn time - duration of thrusting to achieve required DV
+	double iBurnTime = ifDV / iAcceleration;
+
+	//assign data to burn objects
+
 }
 
 void p3Universe::stepSimulation(){
@@ -84,6 +122,12 @@ void p3Universe::stepSimulation(){
 				gravitation.set(fgx, fgy, fgz);
 				universalBodies[i].applyForce(gravitation);
 			}
+		}
+
+		//check for burn commands
+		//run all burn execute methods in body
+		for(int i = 0; i < b->nBurns; i++){
+			b->burns[i].execute();
 		}
 
 		//resolve forces on body
@@ -125,9 +169,7 @@ void p3Universe::stepSimulation(){
 
 		broadPhase(b);
 
-		cout << b->absPos.x << endl;
-
-		//&universalBodies[i] = b;
+		cout << b->id << ": " << b->netForce.y << endl;
 
 	}
 	return;

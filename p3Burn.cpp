@@ -16,3 +16,10 @@ p3Burn::~p3Burn() {
 	// TODO Auto-generated destructor stub
 }
 
+void p3Burn::execute(){
+
+	//check timer and body data
+	//perform thrust at burn location
+	//subtract dt from time remaining
+
+}

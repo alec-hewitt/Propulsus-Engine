@@ -61,6 +61,11 @@ public:
 	Vector4 getGravitation();
 	float greatestV;
 
+	//burn/orbit
+	dataIn info;
+	int nBurns;
+	p3Burn burns[8];
+
 	//smallest possible sphere around the object
 	//broadphase collision
 	float boundingSphereRadius;

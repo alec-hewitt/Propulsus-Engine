@@ -26,20 +26,29 @@ public:
 	Body universalBodies[2];
 	int nBodies;
 
+	//celestial bodies
+	Body celestialBodies[9];
+
+	//data
+	dataOut d;
+
 	//Analyzes initial and target orbits, and calculates burn objects
 	//with independent calculations for varied maneuver types.
 	//F.e.: A Hohmann Transfer orbit will be called to calculate 2 burn objects
 	//if two elliptical orbits are around the same primary and do not intersect.
 	//Calls appropriate maneuver calculation function for UI-selected maneuver
-	void maneuverInit();
+	void maneuverInit(dataIn* ins);
 
-	void hohmannTransferManeuver();
+	void hohmannTransferManeuver(dataIn in);
 
 	//Main Loop
 	//Has access and control over time and DT
 	//Iterates until program ends at 60i/s
 	//Calls appropriate functions (mainly stepSimulation)
 	void update();
+
+	//generate celestial bodies and user bodies
+	void universeInit(dataIn in);
 
 	//manages time-stepping
 	//moves with time at the fixed time step to account for object values at given time
@@ -48,6 +57,8 @@ public:
 
 	//detections collisions of body's bounding spheres
 	void broadPhase(Body* body);
+
+	//function to return data structure
 
 	//adds a new rigid-body to the universe
 	//body will be one outside of any scope

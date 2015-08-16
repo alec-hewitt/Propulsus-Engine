@@ -19,7 +19,7 @@ void Body::setupBody(){
 
 	//setupBody needs to be run before any calculations
 
-	//initate dynamic body proprties
+	//initiate dynamic body properties
 	relPos.set(0, 0, 0);
 	absPos.set(0, 0, 0);
 	rotation.set(0, 0, 0);

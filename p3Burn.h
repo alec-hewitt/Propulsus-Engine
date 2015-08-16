@@ -12,6 +12,12 @@ class p3Burn {
 public:
 	p3Burn();
 	virtual ~p3Burn();
+
+	float duration;
+	float thrust;
+	float tRemaining;
+
+	void execute();
 };
 
 #endif /* P3BURN_H_ */
