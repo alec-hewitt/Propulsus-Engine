@@ -1,5 +1,8 @@
 #include "p3Vector4.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 using namespace std;
 
 //default constructor
@@ -73,6 +76,29 @@ Vector4 Vector4::operator / (const float v4Scalar){
 	scalarQuotient.z = this->z / v4Scalar;
 	return scalarQuotient;
 }
+
+float getMagnitude(Vector4 vector){
+	float magnitude = sqrt(pow(vector.x, 2) + pow(vector.y, 2) + pow(vector.z, 2));
+	return magnitude;
+}
+
+Vector4 scaledVector(float magnitude, Vector4 direction){
+	//retrieve unit vector
+	Vector4 unit = direction / getMagnitude(direction);
+	return (unit * magnitude);
+}
+
+/*
+Vector4 Vector4::polarToCartesian(float magnitude, float direction){
+	float newX = magnitude * (direction.x / (sqrt((direction.x * direction.x) + (direction.y * direction.y))));
+	float newY = magnitude * (direction.y / (sqrt((direction.x * direction.x) + (direction.y * direction.y))));
+	float newZ = magnitude * (direction.z / (sqrt((direction.z * direction.z) + (direction.y * direction.y))));
+
+	Vector4 newVector;
+	newVector.set(newX, newY, newZ);
+	return newVector;
+}
+*/
 
 void Vector4::set(float newX, float newY, float newZ){
 	//set Vector3 quantities to respective param values

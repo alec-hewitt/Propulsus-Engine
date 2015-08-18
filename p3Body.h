@@ -1,13 +1,15 @@
-//p3Body.h
-
 #ifndef P3BODY_H
 #define P3BODY_H
 
+#include <stdint.h>
 #include "p3Vector4.h"
 #include "p3Structure.h"
-#include <stdint.h>
+#include "p3Data.h"
+
+
 
 class Body{
+
 public:
 
 	//constructor
@@ -62,9 +64,7 @@ public:
 	float greatestV;
 
 	//burn/orbit
-	dataIn info;
-	int nBurns;
-	p3Burn burns[8];
+	DataIn info;
 
 	//smallest possible sphere around the object
 	//broadphase collision

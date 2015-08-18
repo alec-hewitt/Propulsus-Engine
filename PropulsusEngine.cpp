@@ -23,74 +23,39 @@ THE SOFTWARE.
 */
 
 #include <iostream>
-
 #include <array>
 
 #include "p3Structure.h"
-#include "p3Body.h"
 #include "p3Universe.h"
-#include "p3TimeStep.h"
 #include "p3Constants.h"
 
 //tests
-
-struct dataIn{
-	//maneuver info
-	int maneuverType;
-	char time; //given in char value yyyymmddhhmmss
-	//initial orbit ID
-	int iOrbitPrimaryID;
-	//initial orbit radius
-	double iRadius;
-	//final orbit ID
-	int fOrbitPrimaryID;
-	//final orbit radius
-	double fRadius;
-	//vehicle info
-	float massInitial;
-	float massFinal;
-	float specificImpulse;
-	Vector4 impulseLocation;
-	float exitPressure; //n/m2
-	float exitArea;
-	float massEjectRate;
-	//center of mass coordinates
-	Vector4 centerOfMass;
-	float width;
-	float height;
-};
-
-struct dataOut{
-	int t;
-};
 
 int main(){
 
 	/* -- TEST -- */
 
 	p3TimeStep step;
-	step.dt = 86400;
-	step.duration = 2592000;
+	step.dt = .5;
+	step.duration = 15;
 
 	p3Universe universe(step);
 
 	Body* earth = universe.createBody();
-	Vector4 pos1(0.1, 0, 0);
+	Vector4 pos1(0, 0, 0);
 	earth->setAbsPosition(pos1);
 
 	Body* moon = universe.createBody();
-	Vector4 pos2(363104000.0, 0, 0);
+	Vector4 pos2(36, 0, 0);
 	moon->setAbsPosition(pos2);
-	Vector4 av(0,1076,0);
-	moon->setLinearVelocity(av);
 
 	p3Structure st;
-	st.setSphere(500);
-	st.mass = earthMass_;
+	st.setSphere(5);
+	st.mass = 6;
 
 	p3Structure st2;
-	st2.setSphere(500);
-	st2.mass = moonMass_;
+	st2.setSphere(5);
+	st2.mass = 6;
 
 	earth->setStructure(st);
 	moon->setStructure(st2);
@@ -98,7 +63,7 @@ int main(){
 	/* -- END -- */
 
 	//input data structure
-	dataIn dIn;
+	DataIn dIn;
 
 	//prepare universe
 	universe.universeInit(dIn);

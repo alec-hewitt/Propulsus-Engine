@@ -32,17 +32,18 @@ void p3Universe::update(){
 		}
 
 		stepSimulation();
+
 	}
 }
 
-void p3Universe::universeInit(dataIn in){
+void p3Universe::universeInit(DataIn in){
 	//setup universe at defined time for required orbits (solar system structure)
 	//generate bodies
 }
 
 //Analyzes initial and target orbits, and calculates burn objects
 //with independent calculations for varied maneuver types.
-void p3Universe::maneuverInit(dataIn in){
+void p3Universe::maneuverInit(DataIn in){
 
 	//run appropriate calculation method
 	if(in.maneuverType == 1){
@@ -50,48 +51,73 @@ void p3Universe::maneuverInit(dataIn in){
 	}
 }
 
-void p3Universe::hohmannTransferManeuver(dataIn in){
-
+void p3Universe::hohmannTransferManeuver(DataIn in){
 	//semi-major axis of transfer orbit
-	double tSMA = (in.iRadius + in.fRadius) / 2;
+		double tSMA = (in.iRadius + in.fRadius) / 2;
 
-	//orbital velocity on initial orbit at transfer intersection
-	double initialOrbitV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID]) / in.iRadius);
-	//orbital velocity on final orbit at transfer intersection
-	double finalOrbitV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID]) / in.fRadius);
+		//orbital velocity on initial orbit at transfer intersection
+		double initialOrbitV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass) / in.iRadius);
+		//orbital velocity on final orbit at transfer intersection
+		double finalOrbitV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass) / in.fRadius);
 
-	//required velocity on transfer orbit at initial orbit intersection
-	double initialTransferV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID]) * ((2/in.iRadius) - (1/tSMA)));
-	//required velocity on transfer orbit at initial orbit intersection
-	double finalTransferV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID]) * ((2/in.fRadius) - (1/tSMA)));
+		//required velocity on transfer orbit at initial orbit intersection
+		double initialTransferV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass) * ((2/in.iRadius) - (1/tSMA)));
+		//required velocity on transfer orbit at initial orbit intersection
+		double finalTransferV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass) * ((2/in.fRadius) - (1/tSMA)));
 
-	//delta-V at initial transfer point
-	double initialDV = initialTransferV - initialOrbitV;
-	//delta-V at final transfer point
-	double finalDV = finalTransferV - finalOrbitV;
+		//delta-V at initial transfer point
+		double initialDV = initialTransferV - initialOrbitV;
+		//delta-V at final transfer point
+		double finalDV = finalTransferV - finalOrbitV;
 
-	//rocket specifications
-	//amount of propellant expelled during each burn
-	float propellantExpelledInitial = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius))));
-	float propellantExpelledFinal = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass)/(in.fRadius * in.fRadius))));
-	//rocket exit velocity
-	float veq = in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius));
-	//thrust of rocket (N)
-	double thrust = in.massEjectRate * veq + in.exitPressure * in.exitArea;
+		//rocket specifications
+		//amount of propellant expelled during each burn
+		float propellantExpelledInitial = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius))));
+		float propellantExpelledFinal = exp(initialDV / (in.specificImpulse * ((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass)/(in.fRadius * in.fRadius))));
+		//rocket exit velocity
+		float iveq = in.specificImpulse * ((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass)/(in.iRadius * in.iRadius));
+		float fveq = in.specificImpulse * ((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass)/(in.fRadius * in.fRadius));
+		//thrust of rocket (N)
+		double iThrust = in.massEjectRate * iveq + in.exitPressure * in.exitArea;
+		double fThrust = in.massEjectRate * fveq + in.exitPressure * in.exitArea;
 
-	///calculate burn mechanics
-	//mass of rocket after initial burn
-	double ifMass = in.massInitial - propellantExpelledInitial;
-	//acceleration of rocket
-	double iAcceleration = thrust/ ifMass;
-	//rocket equation DV from expelled mass
-	double iRocketDV = veq * log(in.massInitial / in.massFinal);
-	//total required change in velocity after first burn
-	double ifDV = initialDV - iRocketDV;
-	//burn time - duration of thrusting to achieve required DV
-	double iBurnTime = ifDV / iAcceleration;
+		///calculate burn mechanics
 
-	//assign data to burn objects
+		//mass of rocket after initial burn
+		double ifMass = in.massInitial - propellantExpelledInitial;
+		//acceleration of rocket
+		double iAcceleration = iThrust/ ifMass;
+		//rocket equation DV from expelled mass
+		double iRocketDV = iveq * log(in.massInitial / in.massFinal);
+		//total required change in velocity after first burn
+		double ifDV = initialDV - iRocketDV;
+		//burn time - duration of thrusting to achieve required DV
+		double iBurnTime = ifDV / iAcceleration;
+
+		//mass of rocket after initial burn
+		double ffMass = in.massFinal - propellantExpelledFinal;
+		//acceleration of rocket
+		double fAcceleration = fThrust/ ffMass;
+		//rocket equation DV from expelled mass
+		double fRocketDV = fveq * log(in.massInitial / in.massFinal);
+		//total required change in velocity after first burn
+		double ffDV = finalDV - fRocketDV;
+		//burn time - duration of thrusting to achieve required DV
+		double fBurnTime = ffDV / fAcceleration;
+
+		//assign data to burn objects and body
+
+		//we assume body position in array is 0
+		nBurns = 2;
+		p3Burn burnA = p3Burn();
+		burnA.duration = iBurnTime;
+		burnA.thrust = iThrust;
+		burns[0] = burnA;
+
+		p3Burn burnB = p3Burn();
+		burnB.duration = fBurnTime;
+		burnB.thrust = fThrust;
+		burns[1] = burnB;
 
 }
 
@@ -126,8 +152,8 @@ void p3Universe::stepSimulation(){
 
 		//check for burn commands
 		//run all burn execute methods in body
-		for(int i = 0; i < b->nBurns; i++){
-			b->burns[i].execute();
+		for(int i = 0; i < nBurns; i++){
+			burns[i].execute(step, b);
 		}
 
 		//resolve forces on body
@@ -139,6 +165,8 @@ void p3Universe::stepSimulation(){
 
 		//set linear velocity accumulative
 		b->linearVelocity = b->linearVelocity + (b->acceleration * step.dt);
+
+		cout << b->linearVelocity.x << endl;
 
 		//retrieve greatest velocity
 		if (b->linearVelocity.x > b->linearVelocity.y){
@@ -168,8 +196,6 @@ void p3Universe::stepSimulation(){
 		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
 		broadPhase(b);
-
-		cout << b->id << ": " << b->netForce.y << endl;
 
 	}
 	return;

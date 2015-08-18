@@ -1,12 +1,8 @@
-/*
- * p3Burn.h
- *
- *  Created on: Aug 4, 2015
- *      Author: alec
- */
-
 #ifndef P3BURN_H_
 #define P3BURN_H_
+
+#include "p3TimeStep.h"
+#include "p3Body.h"
 
 class p3Burn {
 public:
@@ -17,7 +13,11 @@ public:
 	float thrust;
 	float tRemaining;
 
-	void execute();
+	p3TimeStep p;
+
+	void execute(p3TimeStep step, Body* b);
+
+
 };
 
 #endif /* P3BURN_H_ */

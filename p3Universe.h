@@ -1,10 +1,10 @@
+
 #ifndef P3UNIVERSE_H
 #define P3UNIVERSE_H
 
 #include "p3Body.h"
-#include "p3Vector4.h"
+#include "p3Burn.h"
 #include "p3TimeStep.h"
-#include "p3Timer.h"
 
 class p3Universe{
 	
@@ -26,20 +26,22 @@ public:
 	Body universalBodies[2];
 	int nBodies;
 
+	int nBurns;
+	p3Burn burns[9];
+
 	//celestial bodies
 	Body celestialBodies[9];
 
 	//data
-	dataOut d;
 
 	//Analyzes initial and target orbits, and calculates burn objects
 	//with independent calculations for varied maneuver types.
 	//F.e.: A Hohmann Transfer orbit will be called to calculate 2 burn objects
 	//if two elliptical orbits are around the same primary and do not intersect.
 	//Calls appropriate maneuver calculation function for UI-selected maneuver
-	void maneuverInit(dataIn* ins);
+	void maneuverInit(DataIn in);
 
-	void hohmannTransferManeuver(dataIn in);
+	void hohmannTransferManeuver(DataIn in);
 
 	//Main Loop
 	//Has access and control over time and DT
@@ -48,7 +50,7 @@ public:
 	void update();
 
 	//generate celestial bodies and user bodies
-	void universeInit(dataIn in);
+	void universeInit(DataIn dw);
 
 	//manages time-stepping
 	//moves with time at the fixed time step to account for object values at given time
