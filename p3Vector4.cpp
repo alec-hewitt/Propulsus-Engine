@@ -50,7 +50,25 @@ Vector4 Vector4::operator = (const Vector4 &v3Other){
 	return equal;
 }
 
+Vector4 Vector4::operator * (int v3Scalar){
+	//multiply Vector3 quantities by respective param values
+	Vector4 scalarProduct(0, 0, 0);
+	scalarProduct.x = this->x * v3Scalar;
+	scalarProduct.y = this->y * v3Scalar;
+	scalarProduct.z = this->z * v3Scalar;
+	return scalarProduct;
+}
+
 Vector4 Vector4::operator * (const float v3Scalar){
+	//multiply Vector3 quantities by respective param values
+	Vector4 scalarProduct(0, 0, 0);
+	scalarProduct.x = this->x * v3Scalar;
+	scalarProduct.y = this->y * v3Scalar;
+	scalarProduct.z = this->z * v3Scalar;
+	return scalarProduct;
+}
+
+Vector4 Vector4::operator * (const double v3Scalar){
 	//multiply Vector3 quantities by respective param values
 	Vector4 scalarProduct(0, 0, 0);
 	scalarProduct.x = this->x * v3Scalar;

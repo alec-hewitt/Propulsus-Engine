@@ -39,26 +39,26 @@ public:
 	//F.e.: A Hohmann Transfer orbit will be called to calculate 2 burn objects
 	//if two elliptical orbits are around the same primary and do not intersect.
 	//Calls appropriate maneuver calculation function for UI-selected maneuver
-	void maneuverInit(DataIn in);
+	void maneuverInit(DataIn in, DataOut* data);
 
-	void hohmannTransferManeuver(DataIn in);
+	void hohmannTransferManeuver(DataIn in, DataOut* data);
 
 	//Main Loop
 	//Has access and control over time and DT
 	//Iterates until program ends at 60i/s
 	//Calls appropriate functions (mainly stepSimulation)
-	void update();
+	void update(DataIn in, DataOut* data, DataIn dataIn);
 
 	//generate celestial bodies and user bodies
-	void universeInit(DataIn dw);
+	void universeInit(DataIn dw, DataOut* data);
 
 	//manages time-stepping
 	//moves with time at the fixed time step to account for object values at given time
 	//processes all physics in a fixed time-step
-	void stepSimulation();
+	void stepSimulation(DataOut* data, DataIn dataIn);
 
 	//detections collisions of body's bounding spheres
-	void broadPhase(Body* body);
+	void broadPhase(Body* body, DataOut* data, DataIn dataIn);
 
 	//function to return data structure
 

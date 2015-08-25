@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-
 //class constructor
 Body::Body(){
 

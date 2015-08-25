@@ -26,6 +26,7 @@ public:
 	//position/rotation
 	Vector4 relPos;
 	Vector4 absPos;
+	double distFromPrimary;
 	double mass;
 	float rotationalInertia;
 	Vector4 rotation;

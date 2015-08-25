@@ -63,16 +63,19 @@ int main(){
 	/* -- END -- */
 
 	//input data structure
-	DataIn dIn;
+	DataIn dataIn;
+	//data output object
+	DataOut dataOut;
+	DataOut* data;
 
 	//prepare universe
-	universe.universeInit(dIn);
+	universe.universeInit(dataIn, data);
 
 	//begin maneuver calculations
-	universe.maneuverInit(dIn);
+	universe.maneuverInit(dataIn, data);
 
 	//run simulation
-	universe.update();
+	universe.update(dataIn, data, dataIn);
 
 	//output data structure
 	//dataOut dOut;

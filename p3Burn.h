@@ -9,13 +9,19 @@ public:
 	p3Burn();
 	virtual ~p3Burn();
 
+	int maneuverType;
+	int burnNumber;
+	bool executed;
+
 	float duration;
 	float thrust;
-	float tRemaining;
+	float tRemaining = duration;
+	float targetPrimary;
+	float targetORadius;
 
 	p3TimeStep p;
 
-	void execute(p3TimeStep step, Body* b);
+	void execute(p3TimeStep step, Body* b, DataIn dataIn);
 
 
 };

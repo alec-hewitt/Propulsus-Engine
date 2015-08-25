@@ -24,7 +24,11 @@ class Vector4{
 		//sets the x, y, z, and w components of this to those of another Vector3
 		Vector4 operator = (const Vector4 &v4other);
 		//multiplies the x, y, z, and w components of this Vector3 by a scalar
+		Vector4 operator * (int v4Scalar);
+		//multiplies the x, y, z, and w components of this Vector3 by a scalar
 		Vector4 operator * (const float v4Scalar);
+		//multiplies the x, y, z, and w components of this Vector3 by a scalar
+		Vector4 operator * (const double v4Scalar);
 		//Vector4 cross product
 		Vector4 operator * (const Vector4 &v4Other);
 		///divide by scalar

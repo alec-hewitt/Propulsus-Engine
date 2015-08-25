@@ -18,7 +18,7 @@ p3Universe::p3Universe(p3TimeStep timeStep){
 //Iterate at specified delta-times until time duration is reached
 //read code, step simulation, and solve collision
 //non real-time so re-iterate immediately
-void p3Universe::update(){
+void p3Universe::update(DataIn in, DataOut* data, DataIn dataIn){
 
 	//set iterations to be made
 	int nItterations = (1 / this->step.dt) * this->step.duration;
@@ -31,27 +31,35 @@ void p3Universe::update(){
 			universalBodies[i].checked = false;
 		}
 
-		stepSimulation();
+		stepSimulation(data, dataIn);
+
+		//function to aggregate collected data in universe methods throughout iterations
+		//send data to main file for cpp-json parsing
 
 	}
 }
 
-void p3Universe::universeInit(DataIn in){
+void p3Universe::universeInit(DataIn in, DataOut* data){
 	//setup universe at defined time for required orbits (solar system structure)
 	//generate bodies
+
+	//bodies will be created in order (for purpose of ID assignment and comparison) by method:
+	// 1) celestial planets beginning with sun, going outwards by distance from sun
+	// 2) space vehicles in order of parsed array position
+
 }
 
 //Analyzes initial and target orbits, and calculates burn objects
 //with independent calculations for varied maneuver types.
-void p3Universe::maneuverInit(DataIn in){
+void p3Universe::maneuverInit(DataIn in, DataOut* data){
 
 	//run appropriate calculation method
 	if(in.maneuverType == 1){
-		this->hohmannTransferManeuver(in);
+		this->hohmannTransferManeuver(in, data);
 	}
 }
 
-void p3Universe::hohmannTransferManeuver(DataIn in){
+void p3Universe::hohmannTransferManeuver(DataIn in, DataOut* data){
 	//semi-major axis of transfer orbit
 		double tSMA = (in.iRadius + in.fRadius) / 2;
 
@@ -62,7 +70,7 @@ void p3Universe::hohmannTransferManeuver(DataIn in){
 
 		//required velocity on transfer orbit at initial orbit intersection
 		double initialTransferV = sqrt((gravitation_ * celestialBodies[in.iOrbitPrimaryID].mass) * ((2/in.iRadius) - (1/tSMA)));
-		//required velocity on transfer orbit at initial orbit intersection
+		//required velocity on transfer orbit at final orbit intersection
 		double finalTransferV = sqrt((gravitation_ * celestialBodies[in.fOrbitPrimaryID].mass) * ((2/in.fRadius) - (1/tSMA)));
 
 		//delta-V at initial transfer point
@@ -80,6 +88,8 @@ void p3Universe::hohmannTransferManeuver(DataIn in){
 		//thrust of rocket (N)
 		double iThrust = in.massEjectRate * iveq + in.exitPressure * in.exitArea;
 		double fThrust = in.massEjectRate * fveq + in.exitPressure * in.exitArea;
+
+		double rocketMaxDV;
 
 		///calculate burn mechanics
 
@@ -112,16 +122,24 @@ void p3Universe::hohmannTransferManeuver(DataIn in){
 		p3Burn burnA = p3Burn();
 		burnA.duration = iBurnTime;
 		burnA.thrust = iThrust;
+		burnA.targetORadius = in.iRadius;
+		burnA.targetPrimary = in.iOrbitPrimaryID;
+		burnA.maneuverType = 1;
+		burnA.burnNumber = 1;
 		burns[0] = burnA;
 
 		p3Burn burnB = p3Burn();
 		burnB.duration = fBurnTime;
 		burnB.thrust = fThrust;
+		burnB.targetORadius = in.fRadius;
+		burnB.targetPrimary = in.fOrbitPrimaryID;
+		burnB.maneuverType = 1;
+		burnB.burnNumber = 2;
 		burns[1] = burnB;
 
 }
 
-void p3Universe::stepSimulation(){
+void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 
 	/*
 	-Resolve velocity, acceleration, angle, and position of bodies
@@ -148,12 +166,6 @@ void p3Universe::stepSimulation(){
 				gravitation.set(fgx, fgy, fgz);
 				universalBodies[i].applyForce(gravitation);
 			}
-		}
-
-		//check for burn commands
-		//run all burn execute methods in body
-		for(int i = 0; i < nBurns; i++){
-			burns[i].execute(step, b);
 		}
 
 		//resolve forces on body
@@ -195,7 +207,14 @@ void p3Universe::stepSimulation(){
 		//calculate angular momentum
 		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
-		broadPhase(b);
+		broadPhase(b, data, dataIn);
+
+		//check for burn commands
+		//run all burn execute methods in body
+		for(int i = 0; i < nBurns; i++){
+			burns[i].execute(step, b, dataIn);
+		}
+
 
 	}
 	return;
@@ -211,7 +230,7 @@ void p3Universe::stepSimulation(){
  * Basically is this ship going to hit mars or not.
  */
 
-void p3Universe::broadPhase(Body* body){
+void p3Universe::broadPhase(Body* body, DataOut* data, DataIn dataIn){
 
 	//nBodies -1 because i starts at 0 and nBodies starts at 1
 	for (int i = 0; i <= (nBodies - 1); i++){
@@ -230,6 +249,14 @@ void p3Universe::broadPhase(Body* body){
 
 				//distance between bodies
 				float dist = sqrt(((body->absPos.x - universalBodies[i].absPos.x) * (body->absPos.x - universalBodies[i].absPos.x)) + ((body->absPos.y - universalBodies[i].absPos.y) * (body->absPos.y - universalBodies[i].absPos.y)) + ((body->absPos.z - universalBodies[i].absPos.z) * (body->absPos.z - universalBodies[i].absPos.z)));
+
+				//assign distance from primary in data object
+				//if checked body is the orbited primary
+				if(i == dataIn.iOrbitPrimaryID){
+					//set distance variable in body
+					body->distFromPrimary = dist;
+				}
+
 
 				if (dist < boundingDistances){
 					//collision of bounding spheres detected
