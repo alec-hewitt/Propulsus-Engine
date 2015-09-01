@@ -13,9 +13,11 @@ public:
 	int burnNumber;
 	bool executed;
 
-	float duration;
-	float thrust;
-	float tRemaining = duration;
+	float semiMajorAxis;
+	float rApoapsis;
+	float rPeriapsis;
+	float burnOneDuration = 0;
+	float burnTwoDuration = 0;
 	float targetPrimary;
 	float targetORadius;
 

@@ -10,10 +10,12 @@ public:
 		int iOrbitPrimaryID;
 		//initial orbit radius
 		double iRadius;
+		double iInclination;
 		//final orbit ID
 		int fOrbitPrimaryID;
 		//final orbit radius
 		double fRadius;
+		double fInclination;
 		//vehicle info
 		float massInitial;
 		float massFinal;
@@ -26,6 +28,8 @@ public:
 		Vector4 centerOfMass;
 		float width;
 		float height;
+
+		float thrust;
 
 };
 

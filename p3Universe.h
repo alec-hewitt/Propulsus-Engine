@@ -29,9 +29,6 @@ public:
 	int nBurns;
 	p3Burn burns[9];
 
-	//celestial bodies
-	Body celestialBodies[9];
-
 	//data
 
 	//Analyzes initial and target orbits, and calculates burn objects
@@ -47,7 +44,7 @@ public:
 	//Has access and control over time and DT
 	//Iterates until program ends at 60i/s
 	//Calls appropriate functions (mainly stepSimulation)
-	void update(DataIn in, DataOut* data, DataIn dataIn);
+	void update(DataOut* data, DataIn dataIn);
 
 	//generate celestial bodies and user bodies
 	void universeInit(DataIn dw, DataOut* data);

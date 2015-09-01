@@ -33,37 +33,29 @@ THE SOFTWARE.
 
 int main(){
 
-	/* -- TEST -- */
-
 	p3TimeStep step;
 	step.dt = .5;
 	step.duration = 15;
 
 	p3Universe universe(step);
 
-	Body* earth = universe.createBody();
-	Vector4 pos1(0, 0, 0);
-	earth->setAbsPosition(pos1);
-
-	Body* moon = universe.createBody();
-	Vector4 pos2(36, 0, 0);
-	moon->setAbsPosition(pos2);
-
-	p3Structure st;
-	st.setSphere(5);
-	st.mass = 6;
-
-	p3Structure st2;
-	st2.setSphere(5);
-	st2.mass = 6;
-
-	earth->setStructure(st);
-	moon->setStructure(st2);
-
-	/* -- END -- */
-
 	//input data structure
 	DataIn dataIn;
+	dataIn.maneuverType = 1;
+	dataIn.iInclination = 70; //degrees
+	dataIn.iOrbitPrimaryID = 3; //integer
+	dataIn.iRadius = 435000; //M
+	dataIn.fRadius = 635000; //M
+	dataIn.massInitial = 10000; //KG
+	dataIn.massFinal = 9000; //KG
+	dataIn.thrust = 1800000; //N
+
+	dataIn.exitArea = 3.3528;
+	dataIn.exitPressure = 6653440.7752;
+	dataIn.massEjectRate = 788.344;
+	dataIn.specificImpulse = 2580;
+	//retrive inputted data and place into dataIn object
+
 	//data output object
 	DataOut dataOut;
 	DataOut* data;
@@ -75,10 +67,9 @@ int main(){
 	universe.maneuverInit(dataIn, data);
 
 	//run simulation
-	universe.update(dataIn, data, dataIn);
+	universe.update(data, dataIn);
 
 	//output data structure
 	//dataOut dOut;
-	//collect data and send to front-end in dataOut structure
 
 }

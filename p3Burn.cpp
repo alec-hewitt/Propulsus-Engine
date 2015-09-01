@@ -8,6 +8,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "p3Burn.h"
+#include <iostream>
+
+using namespace std;
 
 p3Burn::p3Burn() {
 	// TODO Auto-generated constructor stub
@@ -25,60 +28,55 @@ void p3Burn::execute(p3TimeStep step, Body* b, DataIn dataIn){
 
 	switch(maneuverType){
 
-		//hohmann transfer maneuver
+		//Hohmann transfer maneuver
 		case 1:
 
+			if(b->id == 1){ //check if this body is the spacecraft
 			if(burnNumber == 1){
 			//start burn immediately in circular orbit
-				if(tRemaining > 0){
-					tRemaining -= step.dt; //correct
+				//CHECK IF APOAPSIS IS AT TARGET RADIUS
+				if(rApoapsis < dataIn.fRadius){
 
+				burnOneDuration += step.dt;
 				//calculate force in vector
 				//magnitude of direction vector
 				float magnitude = sqrt(pow(b->linearVelocity.x, 2) + pow(b->linearVelocity.y, 2) + pow(b->linearVelocity.z, 2));
 				//convert velocity by unit vector
 				Vector4 unit = b->linearVelocity / magnitude;
 				//scale by given force magnitude
-				Vector4 force = (unit * thrust);
+				Vector4 force = (unit * dataIn.thrust);
 
 				b->applyForce(force);
 
-				}
+				//THROW FUEL AND SUBTRACT MASS
+
+				} //burn terminate
+
+			} //burn num check
 
 			} else if(burnNumber == 2){
-				//final burn
+				//start final burn when distance from primary  == rApoapsis
+				if(b->distFromPrimary >= rApoapsis){
 				//check if distance from primary < final orbit size (semi-major-axis)
-				if(b->distFromPrimary < dataIn.fRadius){
-					//begin burn, check for time expenditure
-					if(tRemaining > 0){
-						tRemaining -= step.dt; //correct
-
+				if(rApoapsis + rPeriapsis < 2 * rApoapsis){
+					//reached circular orbit
+						burnTwoDuration -= step.dt; //correct
 						//calculate force in vector
 						//magnitude of direction vector
 						float magnitude = sqrt(pow(b->linearVelocity.x, 2) + pow(b->linearVelocity.y, 2) + pow(b->linearVelocity.z, 2));
 						//convert velocity by unit vector
 						Vector4 unit = b->linearVelocity / magnitude;
 						//scale by given force magnitude
-						Vector4 force = (unit * thrust);
-						//reverse burn direction
-						force.x = force.x * -1;
-						force.y = force.y * -1;
-						force.z = force.z * -1;
+						Vector4 force = (unit * dataIn.thrust);
 
 						b->applyForce(force);
 
-					}
-				}
-			}
+					} //burn terminate
+				} //burn initiate
+			} //second burn
 
-		break;
+			break;
 
-	case 2:
-		break;
+		} //switch
 
 	}
-
-
-
-
-}

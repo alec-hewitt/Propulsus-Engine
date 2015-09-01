@@ -36,6 +36,7 @@ public:
 	Vector4 angularAcceleration;
 	Vector4 angularVelocity;
 	Vector4 linearVelocity;
+	float velocity;
 	Vector4 acceleration;
 	Vector4 appliedLinearForces;
 	Vector4 netForce;
