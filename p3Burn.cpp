@@ -46,6 +46,8 @@ void p3Burn::execute(p3TimeStep step, Body* b, DataIn dataIn){
 				//scale by given force magnitude
 				Vector4 force = (unit * dataIn.thrust);
 
+				cout << rApoapsis << endl;
+
 				b->applyForce(force);
 
 				//THROW FUEL AND SUBTRACT MASS

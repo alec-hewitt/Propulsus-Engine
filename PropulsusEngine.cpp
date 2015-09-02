@@ -35,17 +35,17 @@ int main(){
 
 	p3TimeStep step;
 	step.dt = .5;
-	step.duration = 15;
+	step.duration = 50;
 
 	p3Universe universe(step);
 
 	//input data structure
 	DataIn dataIn;
 	dataIn.maneuverType = 1;
-	dataIn.iInclination = 70; //degrees
+	dataIn.iInclination = 0; //degrees
 	dataIn.iOrbitPrimaryID = 3; //integer
 	dataIn.iRadius = 435000; //M
-	dataIn.fRadius = 635000; //M
+	dataIn.fRadius = 535000; //M
 	dataIn.massInitial = 10000; //KG
 	dataIn.massFinal = 9000; //KG
 	dataIn.thrust = 1800000; //N
@@ -61,13 +61,14 @@ int main(){
 	DataOut* data;
 
 	//prepare universe
-	universe.universeInit(dataIn, data);
+	universe.universeInit(dataIn, &dataOut);
 
 	//begin maneuver calculations
 	universe.maneuverInit(dataIn, data);
 
 	//run simulation
 	universe.update(data, dataIn);
+
 
 	//output data structure
 	//dataOut dOut;

@@ -107,13 +107,12 @@ void p3Universe::universeInit(DataIn in, DataOut* data){
 		craftStr.mass = in.massInitial;
 		//set velocity vector
 		//orbital velocity scalar
-		float v = sqrt((gravitation_ * primary->mass) / in.iRadius);
+		float v = sqrt((gravitation_ * primary->mass) / (in.iRadius + primaryStr.radius));
 
 		//convert velocity to vector form
 		Vector4 craftV(0,(v * sin(in.iInclination)), (v * cos(in.iInclination)));
 
-
-		craft->linearVelocity = craftV;
+		craft->setLinearVelocity(craftV);
 		craft->setStructure(craftStr);
 
 	}
@@ -213,17 +212,24 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 
 		for(int i = 0; i < nBodies; i++){
 			if(&universalBodies[i] != b){
+
+
 				double distx = b->absPos.x - universalBodies[i].absPos.x;
 				double disty = b->absPos.y - universalBodies[i].absPos.y;
 				double distz = b->absPos.z - universalBodies[i].absPos.z;
-				double fgx = (gravitation_ * ((b->mass * universalBodies[i].mass) / (distx * distx)));
-				if(universalBodies[i].absPos.x > b->absPos.x){fgx = (fgx * -1);}
-				double fgy = (gravitation_ * ((b->mass * universalBodies[i].mass) / (disty * disty)));
-				if(universalBodies[i].absPos.y > b->absPos.y){fgy = (fgy * -1);}
-				double fgz = (gravitation_ * ((b->mass * universalBodies[i].mass) / (distz * distz)));
-				if(universalBodies[i].absPos.z > b->absPos.z){fgz = (fgz * -1);}
+
+				double dist = sqrt((distx * distx) + (disty * disty) + (distz * distz));
+
+				Vector4 distUnit;
+				distUnit.set(distx/dist, disty/dist, distz/dist);
+
+				double gravity;
+				if(dist == 0){gravity = 0;} else {
+				gravity = (gravitation_ * ((b->mass * universalBodies[i].mass) / dist));
+				}
 				Vector4 gravitation;
-				gravitation.set(fgx, fgy, fgz);
+				gravitation.set(gravity * distUnit.x, gravity * distUnit.y, gravity * distUnit.z);
+
 				universalBodies[i].applyForce(gravitation);
 			}
 		}
@@ -239,6 +245,10 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 		b->linearVelocity.x += b->acceleration.x * step.dt;
 		b->linearVelocity.y += b->acceleration.y * step.dt;
 		b->linearVelocity.z += b->acceleration.z * step.dt;
+
+		b->velocity = sqrt( (b->linearVelocity.x * b->linearVelocity.x) + (b->linearVelocity.y * b->linearVelocity.y) + (b->linearVelocity.z * b->linearVelocity.z));
+
+		//cout << b->velocity << endl;
 
 		//retrieve greatest velocity
 		if (b->linearVelocity.x > b->linearVelocity.y){
@@ -271,14 +281,49 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 
 		switch(dataIn.maneuverType){
 			case 1:
-				float v = b->velocity; //CALCULATE
-				cout << v << endl;
+				if(b->id == 1){
+				float v = sqrt((b->linearVelocity.x * b->linearVelocity.x) + (b->linearVelocity.y * b->linearVelocity.y) + (b->linearVelocity.z * b->linearVelocity.z)); //CALCULATE
 				float sma = (gravitation_ * universalBodies[0].mass) / (2 * ((v * v) / 2));
 				float rApoapsis = (2 * sma) - dataIn.iRadius;
+
 				float rPeriapsis = (2 * sma) - rApoapsis;
-				burns[i].semiMajorAxis = sma;
-				burns[i].rApoapsis = rApoapsis;
-				burns[i].rPeriapsis = rPeriapsis;
+				burns[0].semiMajorAxis = sma;
+				burns[0].rApoapsis = rApoapsis;
+				burns[0].rPeriapsis = rPeriapsis;
+
+				//cout << "AP" << v << endl;
+
+				//DEBUG
+				if(rApoapsis < dataIn.fRadius){
+
+					//burnOneDuration += step.dt;
+					//magnitude of direction vector
+					float magnitude = sqrt(pow(b->linearVelocity.x, 2) + pow(b->linearVelocity.y, 2) + pow(b->linearVelocity.z, 2));
+					//convert velocity by unit vector
+					Vector4 unit = b->linearVelocity / magnitude;
+					//scale by given force magnitude
+					Vector4 force = (unit * dataIn.thrust);
+					force.x = force.x * -1;
+					force.y = force.y * -1;
+					force.z = force.z * -1;
+					b->applyForce(force);
+					//THROW FUEL AND SUBTRACT MASS
+					float forcemag = sqrt((force.x * force.x) + (force.y * force.y) + (force.z * force.z));
+					float dvi = (forcemag / b->mass) * step.dt;
+					float propellantExpelledInitial = exp(dvi / (dataIn.specificImpulse * ((gravitation_ * universalBodies[0].mass)/(dataIn.iRadius * dataIn.iRadius))));
+					b->mass -= propellantExpelledInitial;
+					float iveq = dataIn.specificImpulse * ((gravitation_ * universalBodies[0].mass)/(dataIn.iRadius * dataIn.iRadius));
+					double iRocketDV = iveq * log((b->mass + propellantExpelledInitial) / b->mass);
+					//convert rocket dv to vector
+
+
+				} //burn terminate
+
+				//burn 2
+
+
+
+				}
 				break;
 			}
 
