@@ -18,7 +18,7 @@ p3Universe::p3Universe(p3TimeStep timeStep){
 //Iterate at specified delta-times until time duration is reached
 //read code, step simulation, and solve collision
 //non real-time so re-iterate immediately
-void p3Universe::update(DataOut* data, DataIn dataIn){
+void p3Universe::update(DataIn dataIn){
 
 	//set iterations to be made
 	int nItterations = (1 / this->step.dt) * this->step.duration;
@@ -31,12 +31,19 @@ void p3Universe::update(DataOut* data, DataIn dataIn){
 			universalBodies[i].checked = false;
 		}
 
-		stepSimulation(data, dataIn);
+		stepSimulation(dataIn);
 
 		//function to aggregate collected data in universe methods throughout iterations
 		//send data to main file for cpp-json parsing
 
 	}
+}
+
+DataOut p3Universe::pushData(DataOut dOut){
+	dOut.bMass = universalBodies[1].mass;
+	dOut.burnElapsed = burnOneDuration;
+	dOut.simElapsed = elapsedTime;
+	//assign all other values
 }
 
 void p3Universe::universeInit(DataIn in, DataOut* data){
@@ -103,6 +110,10 @@ void p3Universe::universeInit(DataIn in, DataOut* data){
 		Vector4 craftPos(in.iRadius + primaryStr.radius, 0, 0);
 		craft->setAbsPosition(craftPos);
 		p3Structure craftStr;
+
+			//PSEUDO: SET BODY DATA FROM DATAIN
+
+
 			//set craft dimensions
 		craftStr.mass = in.massInitial;
 		//set velocity vector
@@ -121,33 +132,30 @@ void p3Universe::universeInit(DataIn in, DataOut* data){
 
 //Analyzes initial and target orbits, and calculates burn objects
 //with independent calculations for varied maneuver types.
-void p3Universe::maneuverInit(DataIn in, DataOut* data){
+void p3Universe::maneuverInit(DataIn in){
 
 	//run appropriate calculation method
 	if(in.maneuverType == 1){
-		this->hohmannTransferManeuver(in, data);
+		this->hohmannTransferManeuver(in, &dOut);
 	}
 }
 
 void p3Universe::hohmannTransferManeuver(DataIn in, DataOut* data){
-	//semi-major axis of transfer orbit
-		double tSMA = (in.iRadius + in.fRadius) / 2;
 
+		//semi-major axis of transfer orbit
+		double tSMA = (in.iRadius + in.fRadius) / 2;
 		//orbital velocity on initial orbit at transfer intersection
 		double initialOrbitV = sqrt((gravitation_ * universalBodies[0].mass) / in.iRadius);
 		//orbital velocity on final orbit at transfer intersection
 		double finalOrbitV = sqrt((gravitation_ * universalBodies[0].mass) / in.fRadius);
-
 		//required velocity on transfer orbit at initial orbit intersection
 		double initialTransferV = sqrt((gravitation_ * universalBodies[0].mass) * ((2/in.iRadius) - (1/tSMA)));
 		//required velocity on transfer orbit at final orbit intersection
 		double finalTransferV = sqrt((gravitation_ * universalBodies[0].mass) * ((2/in.fRadius) - (1/tSMA)));
-
 		//delta-V at initial transfer point
 		double initialDV = initialTransferV - initialOrbitV;
 		//delta-V at final transfer point
 		double finalDV = finalTransferV - finalOrbitV;
-
 		//rocket specifications
 		//amount of propellant expelled during each burn
 		float propellantExpelledInitial = exp(initialDV / (in.specificImpulse * ((gravitation_ * universalBodies[0].mass)/(in.iRadius * in.iRadius))));
@@ -158,27 +166,6 @@ void p3Universe::hohmannTransferManeuver(DataIn in, DataOut* data){
 		//thrust of rocket (N)
 		double iThrust = in.massEjectRate * iveq + in.exitPressure * in.exitArea;
 		double fThrust = in.massEjectRate * fveq + in.exitPressure * in.exitArea;
-
-		//double rocketMaxDV;
-
-		///calculate burn mechanics
-		//mass of rocket after initial burn
-		double ifMass = in.massInitial - propellantExpelledInitial;
-		//acceleration of rocket
-		double iAcceleration = iThrust/ ifMass;
-		//rocket equation DV from expelled mass
-		double iRocketDV = iveq * log(in.massInitial / ifMass);
-		//total required change in velocity after first burn
-		double ifDV = initialDV - iRocketDV;
-
-		//mass of rocket after fianl burn
-		double ffMass = ifMass - propellantExpelledFinal;
-		//acceleration of rocket
-		double fAcceleration = fThrust/ ffMass;
-		//rocket equation DV from expelled mass
-		double fRocketDV = fveq * log(ifMass / ffMass);
-		//total required change in velocity after first burn
-		double ffDV = finalDV - fRocketDV;
 
 		//assign data to burn objects and body
 		nBurns = 2;
@@ -198,7 +185,7 @@ void p3Universe::hohmannTransferManeuver(DataIn in, DataOut* data){
 
 }
 
-void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
+void p3Universe::stepSimulation(DataIn dataIn){
 
 	/*
 	-Resolve velocity, acceleration, angle, and position of bodies
@@ -209,6 +196,8 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 	for (int i = 0; i < nBodies; i++){
 
 	Body* b = &universalBodies[i];
+
+	elapsedTime += step.dt;
 
 		for(int i = 0; i < nBodies; i++){
 			if(&universalBodies[i] != b){
@@ -277,7 +266,7 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 		//calculate angular momentum
 		b->angularMomentum + (b->angularVelocity * b->structure.rotationalInertia);
 
-		broadPhase(b, data, dataIn);
+		broadPhase(b, dataIn);
 
 		switch(dataIn.maneuverType){
 			case 1:
@@ -296,7 +285,7 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 				//DEBUG
 				if(rApoapsis < dataIn.fRadius){
 
-					//burnOneDuration += step.dt;
+					burnOneDuration += step.dt;
 					//magnitude of direction vector
 					float magnitude = sqrt(pow(b->linearVelocity.x, 2) + pow(b->linearVelocity.y, 2) + pow(b->linearVelocity.z, 2));
 					//convert velocity by unit vector
@@ -307,6 +296,7 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 					force.y = force.y * -1;
 					force.z = force.z * -1;
 					b->applyForce(force);
+					cout << force.x << endl;
 					//THROW FUEL AND SUBTRACT MASS
 					float forcemag = sqrt((force.x * force.x) + (force.y * force.y) + (force.z * force.z));
 					float dvi = (forcemag / b->mass) * step.dt;
@@ -327,26 +317,9 @@ void p3Universe::stepSimulation(DataOut* data, DataIn dataIn){
 				break;
 			}
 
-		//check for burn commands
-		//run all burn execute methods in body
-		for(int i = 0; i < nBurns; i++){
-			//burns[i].execute(step, b, dataIn);
-		}
-
-
 	}
 	return;
 }
-
-/*
- * It may be reasonable to use only a more brute-force and less intrusive broad-phase
- * collision detection method with no further detection phases, due to both the
- * expected small amount of generated bodies in the universe, and the expected scarcity
- * of collisions in the universe at any given time or even throughout entire execution.
- * The nature of most collisions in problems of orbital dynamics (excluding those such as docking procedures)
- * do not generally require intense collision checking in small spaces.
- * Basically is this ship going to hit mars or not.
- */
 
 void p3Universe::broadPhase(Body* body, DataOut* data, DataIn dataIn){
 

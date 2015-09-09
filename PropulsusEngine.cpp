@@ -33,44 +33,64 @@ THE SOFTWARE.
 
 int main(){
 
-	p3TimeStep step;
-	step.dt = .5;
-	step.duration = 50;
-
-	p3Universe universe(step);
+	//(seconds) given from vehicle
+	float simRefreshRate;
+	int sim;
 
 	//input data structure
 	DataIn dataIn;
-	dataIn.maneuverType = 1;
-	dataIn.iInclination = 0; //degrees
-	dataIn.iOrbitPrimaryID = 3; //integer
-	dataIn.iRadius = 435000; //M
-	dataIn.fRadius = 535000; //M
-	dataIn.massInitial = 10000; //KG
-	dataIn.massFinal = 9000; //KG
-	dataIn.thrust = 1800000; //N
+	//set data to given vehicle data
+			//TEST
+			dataIn.maneuverType = 1;
+			dataIn.iInclination = 0; //degrees
+			dataIn.iOrbitPrimaryID = 3; //integer
+			dataIn.iRadius = 435000; //M
+			dataIn.fRadius = 535000; //M
+			dataIn.massInitial = 10000; //KG
+			dataIn.massFinal = 9000; //KG
+			dataIn.thrust = 1800000; //N
+			dataIn.exitArea = 3.3528;
+			dataIn.exitPressure = 6653440.7752;
+			dataIn.massEjectRate = 788.344;
+			dataIn.specificImpulse = 2580;
 
-	dataIn.exitArea = 3.3528;
-	dataIn.exitPressure = 6653440.7752;
-	dataIn.massEjectRate = 788.344;
-	dataIn.specificImpulse = 2580;
-	//retrive inputted data and place into dataIn object
+	//filled with data every sim
+	DataOut allDataOut[10];
 
-	//data output object
-	DataOut dataOut;
-	DataOut* data;
+	DataIn nextSim;
+
+	nextSim = simulation(&allDataOut[sim], dataIn);
+	nextSim.burnElapsed += simRefreshRate;
+	nextSim.simElapsed += simRefreshRate;
+
+	//PSEUDO: run next simulation, passing nextSim and incremental allDataOut
+		//GIVE NEXT SIMULATION VAHICLE VELOCITY AND THRUST
+		//next simualtion requires ...
+
+}
+
+DataIn simulation(DataOut* dataOut, DataIn dataIn){
+
+	p3TimeStep step;
+	step.dt = .5;
+	step.duration = 50;
+	p3Universe universe(step);
 
 	//prepare universe
-	universe.universeInit(dataIn, &dataOut);
+	universe.universeInit(dataIn);
 
 	//begin maneuver calculations
-	universe.maneuverInit(dataIn, data);
+	universe.maneuverInit(dataIn);
 
 	//run simulation
-	universe.update(data, dataIn);
+	universe.update(dataIn);
 
+	DataIn next;
+	DataOut incoming;
+	incoming = universe.pushData(universe.dOut);
+	next.bMass = incoming.bMass;
 
-	//output data structure
-	//dataOut dOut;
+		//GIVE INCOMING DATA TO allDataOut OBJECT TO BE SAVED FROM THIS SIMULATION
 
+	return next;
 }

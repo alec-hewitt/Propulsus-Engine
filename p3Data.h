@@ -31,6 +31,16 @@ public:
 
 		float thrust;
 
+		float simElapsed;
+		float burnElapsed;
+		float bMass;
+		Vector4 bVelocity;
+		Vector4 bAcceleration;
+		Vector4 bPos;
+		Vector4 bRot;
+		Vector4 bNetForce;
+
+
 };
 
 class DataOut{
@@ -59,6 +69,16 @@ public:
 	double hm_final_rocket_dv;
 	double hm_initial_burn_time;
 	double hm_final_burn_time;
+
+	float simElapsed;
+	float burnElapsed;
+	float bMass;
+	Vector4 bVelocity;
+	Vector4 bAcceleration;
+	Vector4 bPos;
+	Vector4 bRot;
+	Vector4 bNetForce;
+
 };
 
 #endif

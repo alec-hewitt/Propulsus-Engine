@@ -29,14 +29,18 @@ public:
 	int nBurns;
 	p3Burn burns[9];
 
-	//data
+	float burnOneDuration;
+	float burnTwoDuration;
 
+	DataOut dOut;
+
+	//data
 	//Analyzes initial and target orbits, and calculates burn objects
 	//with independent calculations for varied maneuver types.
 	//F.e.: A Hohmann Transfer orbit will be called to calculate 2 burn objects
 	//if two elliptical orbits are around the same primary and do not intersect.
 	//Calls appropriate maneuver calculation function for UI-selected maneuver
-	void maneuverInit(DataIn in, DataOut* data);
+	void maneuverInit(DataIn in);
 
 	void hohmannTransferManeuver(DataIn in, DataOut* data);
 
@@ -44,20 +48,21 @@ public:
 	//Has access and control over time and DT
 	//Iterates until program ends at 60i/s
 	//Calls appropriate functions (mainly stepSimulation)
-	void update(DataOut* data, DataIn dataIn);
+	void update(DataIn dataIn);
 
 	//generate celestial bodies and user bodies
-	void universeInit(DataIn dw, DataOut* data);
+	void universeInit(DataIn dw);
 
 	//manages time-stepping
 	//moves with time at the fixed time step to account for object values at given time
 	//processes all physics in a fixed time-step
-	void stepSimulation(DataOut* data, DataIn dataIn);
+	void stepSimulation(DataIn dataIn);
 
 	//detections collisions of body's bounding spheres
-	void broadPhase(Body* body, DataOut* data, DataIn dataIn);
+	void broadPhase(Body* body, DataIn dataIn);
 
 	//function to return data structure
+	DataOut pushData(DataOut dOut);
 
 	//adds a new rigid-body to the universe
 	//body will be one outside of any scope
